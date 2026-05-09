@@ -21,7 +21,9 @@ For significant implementation changes, run Fallow and consider its feedback bef
 pnpm dlx fallow --no-cache --format human
 ```
 
-If Fallow is unavailable, record that it was skipped and perform a local code-quality review before running the deterministic checks. Fallow entry points are configured in `.fallowrc.json`.
+If Fallow is unavailable, record that it was skipped and perform a local code-quality review before running the deterministic checks.
+
+Fallow config lives in `.fallowrc.json`. Fallow 2.x uses the keys `entry` (glob list of analysis entry points — source, tests, scripts) and `ignorePatterns` (globs to skip). If a Fallow major version bump rejects the config schema, update `.fallowrc.json` to match the new accepted keys (the parser error lists them) before troubleshooting further.
 
 ## Optional deeper checks
 

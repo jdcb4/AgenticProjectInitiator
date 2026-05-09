@@ -75,6 +75,14 @@ Durable decisions about the Project Initiation base itself. ADR-lite format. New
 
 **Rejected alternatives:** More aggressive action-version bumps (the launcher project bumped setup-node and pnpm/action-setup to `@v6`, but those majors aren't confirmed stable in our reference — chose conservative + Renovate over speculative bumps).
 
+## 2026-05-09: Fallow 2.x config schema
+
+**Decision:** `_shared/.fallowrc.json` now uses Fallow 2.x's accepted keys: `entry` (replacing `entrypoints` and folding in the old `tests` and `scripts` lists) and `ignorePatterns` (replacing `ignore`). Documented in `docs/VERIFICATION.md`.
+
+**Reasoning:** Fallow 2.x renamed and reshaped these keys. The old config produces a hard parser failure ("unknown field `entrypoints`") which surfaced when a scaffolded project tried `pnpm dlx fallow`. The fix is mechanical — the parser error itself lists the accepted keys.
+
+**Why we don't pin a Fallow version:** Pinning (e.g., `pnpm dlx fallow@2.68.0`) trades one problem for another — projects scaffolded today would stay frozen on 2.68.0 forever. Better to track `latest` and rely on Renovate to surface major bumps for review. VERIFICATION.md now warns the agent that Fallow major bumps may need a small `.fallowrc.json` migration.
+
 ## 2026-05-09: Local dev shell is Windows PowerShell
 
 **Decision:** Templates and per-project agent rules call out that local dev runs on Windows PowerShell (5.1 or 7). The per-project `AGENTS.md` includes a hard rule banning `&&`/`||` chains and bash-only env-var syntax in interactively-run commands. `docs/AGENT_REFERENCE.md` carries the bash↔PowerShell cheatsheet.

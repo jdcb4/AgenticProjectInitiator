@@ -1,9 +1,11 @@
 {
   "$schema": "https://fallow.dev/schema.json",
-  "entrypoints": ["src/**/*.{ts,tsx}"],
-  "tests": ["src/**/*.test.{ts,tsx}", "tests/**/*.{ts,tsx}"],
-  "scripts": ["scripts/**/*.{ts,mjs,js}"],
-  "ignore": [
+  "entry": [
+    "src/**/*.{ts,tsx}",
+    "tests/**/*.{ts,tsx}",
+    "scripts/**/*.{ts,mjs,js}"
+  ],
+  "ignorePatterns": [
     "**/*.generated.*",
     "dist/**",
     "build/**",
