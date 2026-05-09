@@ -4,7 +4,9 @@ import path from "node:path";
 
 export default defineConfig(({ mode }) => ({
   plugins: [react()],
-  base: mode === "github-pages" ? "/{{project_slug}}/" : "/",
+  // The github-pages base must match the actual GitHub repo name (case-sensitive).
+  // It is set at scaffold time from --repo-name and can be edited here if the repo is renamed.
+  base: mode === "github-pages" ? "/{{repo_name}}/" : "/",
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),

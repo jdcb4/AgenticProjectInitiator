@@ -38,9 +38,10 @@ const baseDir = resolve(fileURLToPath(import.meta.url), "..", "..");
 const initialConfigDir = resolve(baseDir, "initial_config");
 
 interface CliFlags {
-  name?: string;
-  preset?: string;
-  dockerNamespace?: string;
+  name: string | undefined;
+  preset: string | undefined;
+  dockerNamespace: string | undefined;
+  repoName: string | undefined;
   yes: boolean;
   help: boolean;
 }
@@ -51,6 +52,7 @@ function parseFlags(): CliFlags {
       name: { type: "string" },
       preset: { type: "string" },
       "docker-namespace": { type: "string" },
+      "repo-name": { type: "string" },
       yes: { type: "boolean", short: "y", default: false },
       help: { type: "boolean", short: "h", default: false },
     },
@@ -61,9 +63,19 @@ function parseFlags(): CliFlags {
     name: values.name as string | undefined,
     preset: values.preset as string | undefined,
     dockerNamespace: values["docker-namespace"] as string | undefined,
+    repoName: values["repo-name"] as string | undefined,
     yes: Boolean(values.yes),
     help: Boolean(values.help),
   };
+}
+
+const REPO_NAME_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._-]*$/;
+
+function validateRepoName(value: string): true | string {
+  if (!REPO_NAME_PATTERN.test(value)) {
+    return "Use letters, digits, hyphens, underscores, or periods. Must start with a letter or digit.";
+  }
+  return true;
 }
 
 function printUsage(presets: Record<string, PresetConfig>): void {
@@ -78,6 +90,8 @@ Options:
   --name <string>              Project name (human-readable). Required if non-interactive.
   --preset <id>                One of: ${presetIds}. Required if non-interactive.
   --docker-namespace <string>  Docker Hub namespace for image tags. Default: jdcb4.
+  --repo-name <string>         GitHub repo name (case-preserving). Default: the lowercase slug.
+                               Used for the GitHub Pages base URL — must match the actual repo name.
   --yes, -y                    Skip the final confirmation prompt.
   --help, -h                   Show this help.
 
@@ -128,6 +142,12 @@ async function main(): Promise<void> {
   let projectName = flags.name?.trim();
   let presetId = flags.preset;
   let dockerNamespace = flags.dockerNamespace?.trim();
+  let repoName = flags.repoName?.trim();
+
+  if (repoName && validateRepoName(repoName) !== true) {
+    console.error(`Invalid --repo-name: ${validateRepoName(repoName)}`);
+    process.exit(1);
+  }
 
   if (missing.length > 0) {
     if (!isTTY) {
@@ -138,10 +158,14 @@ async function main(): Promise<void> {
           `  --name "<project name>"\n` +
           `  --preset <${presetIds.join(" | ")}>\n` +
           `  --docker-namespace <namespace>   (optional, default: jdcb4)\n` +
+          `  --repo-name <name>               (optional, default: lowercase slug; must match real GitHub repo for Pages)\n` +
           `  --yes                            (optional, skips confirmation)\n`,
       );
       process.exit(2);
     }
+
+    // Compute the suggested repo-name default once we know the project name.
+    const slugSoFar = projectName ? slugify(projectName) : "";
 
     const answers = await prompts(
       [
@@ -168,6 +192,17 @@ async function main(): Promise<void> {
           message: "Docker Hub namespace (used for image tags):",
           initial: "jdcb4",
         },
+        flags.repoName === undefined && {
+          type: "text",
+          name: "repoName",
+          message:
+            "GitHub repo name (case-preserving — must match the real repo for Pages):",
+          initial: (_prev: unknown, values: prompts.Answers<string>) => {
+            const fromName = values.projectName as string | undefined;
+            return slugify((fromName ?? projectName ?? "") || slugSoFar);
+          },
+          validate: validateRepoName,
+        },
       ].filter(Boolean) as prompts.PromptObject[],
       {
         onCancel: () => {
@@ -180,6 +215,7 @@ async function main(): Promise<void> {
     projectName = projectName ?? (answers.projectName as string).trim();
     presetId = presetId ?? (answers.presetId as string);
     dockerNamespace = dockerNamespace ?? (answers.dockerNamespace as string);
+    repoName = repoName ?? (answers.repoName as string)?.trim();
   }
 
   // Default the docker namespace if it was never supplied.
@@ -197,10 +233,14 @@ async function main(): Promise<void> {
   }
 
   const projectSlug = slugify(projectName);
+  // Default repoName to the slug when not supplied (e.g., non-interactive run
+  // without --repo-name). Users with mixed-case GitHub repos must pass --repo-name.
+  if (!repoName) repoName = projectSlug;
 
   const variables: Record<string, string> = {
     project_name: projectName,
     project_slug: projectSlug,
+    repo_name: repoName,
     docker_namespace: dockerNamespace,
     preset_id: presetId!,
     preset_label: preset.vars.preset_label,

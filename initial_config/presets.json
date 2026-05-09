@@ -36,6 +36,7 @@
   "variables": [
     "project_name",
     "project_slug",
+    "repo_name",
     "docker_namespace",
     "preset_id",
     "preset_label",

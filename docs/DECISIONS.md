@@ -2,6 +2,16 @@
 
 Durable decisions about the Project Initiation base itself. ADR-lite format. Newest decisions append to the bottom.
 
+## 2026-05-10: Separate `repo_name` from `project_slug`
+
+**Decision:** Added a `repo_name` template variable (and a `--repo-name` CLI flag / interactive prompt) distinct from `project_slug`. `repo_name` is case-preserving and defaults to the slug; it is used in `vite.config.ts` for the GitHub Pages `base` URL and in the deployment doc's example URL. `project_slug` remains lowercase kebab-case for npm package names and Docker image tags.
+
+**Reasoning:** GitHub Pages serves projects at `https://<user>.github.io/<RepoName>/` — case-sensitive, exact match required. The lowercase slug works for npm/Docker but caused Pages assets to 404 whenever the user named their repo with mixed case (e.g. `AgenticProjectInitiator`). Splitting the two concepts lets each subsystem get the casing it actually needs.
+
+**Rejected alternatives:**
+- *Force the user to pick a single slug that works for all subsystems.* Loses the human-friendly mixed-case repo names the user prefers, and Docker still requires lowercase regardless.
+- *Auto-derive `repo_name` from the project name's casing.* Fragile — there's no reliable way to convert "Word Game" to the user's actual GitHub repo (could be `WordGame`, `word-game`, `Word_Game`, etc.).
+
 ## 2026-05-09: Single-base CLI scaffolder, three presets
 
 **Decision:** One template repo at `_ProjectInitiation/` with a CLI scaffolder (`scripts/init.ts`) that materialises one of three presets (`client-only`, `hono-cloudflare`, `express-fullstack`) into a target folder.

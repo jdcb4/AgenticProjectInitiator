@@ -68,15 +68,20 @@ A single interactive flow looks human-friendly but breaks in agent sessions: pip
 
 ## Variables
 
-| Variable           | Source                              |
-| ------------------ | ----------------------------------- |
-| `project_name`     | First prompt answer                 |
-| `project_slug`     | `slugify(project_name)`             |
-| `docker_namespace` | Prompt, defaults to `jdcb4`         |
-| `preset_id`        | Selected preset                     |
-| `preset_label`     | `presets.json#presets.<id>.vars`    |
-| `deploy_targets`   | `presets.json#presets.<id>.vars`    |
-| `year`             | Current calendar year               |
+| Variable           | Source                                                                  |
+| ------------------ | ----------------------------------------------------------------------- |
+| `project_name`     | First prompt answer                                                     |
+| `project_slug`     | `slugify(project_name)` — lowercase kebab-case for npm/Docker/internal  |
+| `repo_name`        | `--repo-name` flag or prompt; defaults to `project_slug`. Case-preserving. Used for the GitHub Pages base URL — must match the actual repo name. |
+| `docker_namespace` | Prompt, defaults to `jdcb4`                                             |
+| `preset_id`        | Selected preset                                                         |
+| `preset_label`     | `presets.json#presets.<id>.vars`                                        |
+| `deploy_targets`   | `presets.json#presets.<id>.vars`                                        |
+| `year`             | Current calendar year                                                   |
+
+### Why `repo_name` is separate from `project_slug`
+
+`project_slug` is forced to lowercase kebab-case so it works as an npm package name and a Docker tag (both reject uppercase). GitHub repo names are case-sensitive, and the GitHub Pages URL is `/<repo-name>/` exactly. If a user names their repo `WordGame` while the slug is `word-game`, Vite's `base: "/word-game/"` doesn't match `/WordGame/` and assets 404 even though the index page loads. `repo_name` lets the user pin the case-preserving form for the Pages base while keeping `project_slug` clean for everything else.
 
 ## Preset boundaries
 

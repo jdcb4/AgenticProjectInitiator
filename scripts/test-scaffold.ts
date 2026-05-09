@@ -41,6 +41,7 @@ async function main(): Promise<void> {
       const vars = {
         project_name: "Smoke Test",
         project_slug: "smoke-test",
+        repo_name: "SmokeTest",
         docker_namespace: "test",
         preset_id: presetId,
         preset_label: preset.vars.preset_label,

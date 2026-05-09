@@ -29,6 +29,7 @@ pnpm dlx tsx C:\CodingProjects\_ProjectInitiation\scripts\init.ts `
   --name "My New App" `
   --preset client-only `
   --docker-namespace jdcb4 `
+  --repo-name MyNewApp `
   --yes
 
 pnpm install
@@ -36,6 +37,8 @@ pnpm run verify
 ```
 
 `--preset` must be one of: `client-only`, `hono-cloudflare`, `express-fullstack`. `--yes` skips the confirmation prompt; without it the scaffolder still asks "scaffold here? y/n" interactively. If `stdin` is not a TTY, `--yes` is required.
+
+`--repo-name` must match your GitHub repo name exactly (case-sensitive). It's used as the GitHub Pages base URL — `https://<user>.github.io/<repo-name>/` — and a mismatch causes assets to 404 in production. Defaults to the lowercase slug if omitted.
 
 ### Interactive (humans at a terminal)
 

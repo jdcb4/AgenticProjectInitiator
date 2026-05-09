@@ -13,11 +13,12 @@ Step 1 — Scaffold (non-interactive, single command)
 
 Run this exact command. It uses CLI flags so there are NO interactive prompts to negotiate. Do not pipe stdin or use timed writes.
 
-  pnpm dlx tsx C:\CodingProjects\_ProjectInitiation\scripts\init.ts --name "<<project name, e.g. "Word Game">>" --preset <<one of: client-only | hono-cloudflare | express-fullstack>> --docker-namespace jdcb4 --yes
+  pnpm dlx tsx C:\CodingProjects\_ProjectInitiation\scripts\init.ts --name "<<project name, e.g. "Word Game">>" --preset <<one of: client-only | hono-cloudflare | express-fullstack>> --docker-namespace jdcb4 --repo-name "<<exact GitHub repo name, e.g. WordGame>>" --yes
 
 Notes:
 - --name must be quoted if it contains spaces.
 - --preset must be exactly one of: client-only, hono-cloudflare, express-fullstack.
+- --repo-name must EXACTLY match the GitHub repo (case-sensitive). It is used as the GitHub Pages base URL — a mismatch causes assets to 404 in production. If unsure, use the lowercase kebab slug to match the npm package name.
 - --yes skips the confirmation prompt; required because stdin is not a TTY in agent sessions.
 - The scaffolder refuses to run if the working directory is not empty (.git is allowed).
 

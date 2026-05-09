@@ -42,12 +42,18 @@ The workflow is `.github/workflows/pages.yml`.
 
 Repository setup (one-time):
 
-1. Push the project to GitHub.
+1. Push the project to GitHub. The repo name **must match** the Pages base path below — GitHub repo names are case-sensitive.
 2. Open `Settings → Pages`.
 3. Set `Build and deployment` source to `GitHub Actions`.
 4. Push to `main` (or run the workflow manually).
 
-The Pages base path is set in `vite.config.ts` and currently uses `/{{project_slug}}/`. If the GitHub repository name differs from the project slug, update the `base` value in `vite.config.ts` and run `pnpm run build:pages` to verify.
+The Pages base path is set in `vite.config.ts` and currently uses `/{{repo_name}}/`. The Pages URL will be:
+
+```text
+https://<your-github-username>.github.io/{{repo_name}}/
+```
+
+If the GitHub repository is renamed, update the `base` value in `vite.config.ts` to match (case-sensitive) and run `pnpm run build:pages` to verify. A mismatch causes assets to 404 even though the index page loads.
 
 ## Verification before deploy
 
