@@ -126,6 +126,43 @@ git diff --stat
 - Avoid broad rewrites when a focused change will do.
 - Keep public APIs narrow and documented.
 
+## Working on Windows (PowerShell)
+
+The user's local dev environment is Windows with PowerShell (5.1 or 7). CI and Docker run Linux bash, so commands inside `Dockerfile`, `.github/workflows/*.yml`, and `package.json` scripts can stay bash-flavoured (npm/pnpm spawn cmd.exe on Windows for script execution, which supports `&&`).
+
+Rules for shell commands you run **interactively** during local development:
+
+- **No `&&` or `||` chains.** Windows PowerShell 5.1 doesn't support them. Use `;` for unconditional sequencing or `; if ($?) { … }` for conditional.
+- **Env vars are `$env:NAME`**, not `$NAME` or `${NAME}`.
+- **Line continuation is backtick `` ` ``**, not `\`.
+- **`$null`, not `/dev/null`.** Redirect with `> $null` or `2> $null`.
+- **Avoid `2>&1` on native executables.** PowerShell wraps stderr lines in error records and sets `$?` to `$false` even when the exe exited 0. Just let stderr flow.
+- **`Remove-Item -Recurse -Force`**, not `rm -rf`.
+- **`New-Item -ItemType Directory -Force -Path …`** or just `mkdir …` (PowerShell's `mkdir` creates parents implicitly when given a path).
+- **Quote paths with spaces with double quotes**, not single (single quotes also work but disable variable expansion).
+
+### Cross-shell command equivalents
+
+| Task                              | Bash                              | PowerShell                                   |
+| --------------------------------- | --------------------------------- | -------------------------------------------- |
+| Sequence (always run B)           | `A; B` or `A && B`                | `A; B`                                       |
+| Conditional (run B if A succeeds) | `A && B`                          | `A; if ($?) { B }`                           |
+| Set env var inline                | `FOO=bar pnpm dev`                | `$env:FOO="bar"; pnpm dev`                   |
+| Multi-line                        | `cmd \`<br>` --flag`              | `cmd `` ` ``<br>` --flag`                    |
+| Make dir incl. parents            | `mkdir -p path/to/dir`            | `mkdir path/to/dir`                          |
+| Remove dir recursively            | `rm -rf dir`                      | `Remove-Item -Recurse -Force dir`            |
+| Suppress output                   | `cmd > /dev/null 2>&1`            | `cmd > $null 2> $null`                       |
+| Read env var                      | `echo $FOO`                       | `$env:FOO` or `Write-Output $env:FOO`        |
+
+### When to use bash anyway
+
+If you absolutely need bash semantics (running a POSIX shell script, complex pipe with `2>&1`, etc.), git-bash ships with Git for Windows and is on PATH on this user's machine. Invoke a bash script with `bash script.sh`. But don't reach for it as a default — most everyday work fits PowerShell cleanly.
+
+### When documenting commands in `/docs`
+
+- For commands that run in CI/Docker (Linux): bash syntax is correct, label fences as ```` ```bash ````.
+- For commands the user runs locally: write them so they work in both shells when possible (single-line `pnpm` invocations, no chains). When that's impossible, label the fence as ```` ```powershell ```` and provide the PowerShell form.
+
 ## When blocked
 
 1. Make the smallest safe improvement available.

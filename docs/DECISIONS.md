@@ -52,6 +52,37 @@ Durable decisions about the Project Initiation base itself. ADR-lite format. New
 
 **Rejected alternatives:** Dependabot (no third-party install, but no grouping or auto-merge of patches by default — more PR churn for an agent-driven workflow).
 
+## 2026-05-09: Scaffolder is dual-mode (CLI flags primary, prompts fallback)
+
+**Decision:** `scripts/init.ts` accepts `--name`, `--preset`, `--docker-namespace`, and `--yes` flags. When stdin is not a TTY, all required flags must be present or the script exits with code 2. When stdin is a TTY, missing values are prompted for one at a time.
+
+**Reasoning:** Initial test-drive showed an agent fumbling for many minutes trying to feed the interactive `prompts` library via piped stdin (race conditions corrupted the project name as `NewLaunchery` because the trailing `y` of the confirmation merged into the name field). CLI flags bypass the prompt library entirely and give agents a deterministic single-command contract. Humans at a terminal still get the friendly interactive flow.
+
+**Rejected alternatives:**
+- *Just better-document the prompts.* Documentation can't fix a TTY-shaped API; the underlying race remains.
+- *Flags only, no prompts.* Hostile to humans for first-run discovery; no compelling reason to remove the interactive path.
+
+## 2026-05-09: Scaffold reliability fixes from first real test-drive
+
+**Decision:** Five fixes applied after the launcher project surfaced real friction:
+
+1. **Workflows** — Removed `with: version: 9` from `pnpm/action-setup` (combined with `package.json#packageManager` it now triggers `ERR_PNPM_BAD_PM_VERSION`; the action reads `packageManager` from package.json). Added workflow-level `env: FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"` so Node 20 deprecation warnings stop blocking. Bumped only `actions/checkout@v5` (latest confirmed major); left `pnpm/action-setup` and `actions/setup-node` at `@v4` for stability — Renovate will bump them as new majors stabilise.
+2. **Lint script** — Dropped `--max-warnings=0` from all three presets. With `simple-import-sort` set at "warn" severity, that flag turned every styling drift into a CI failure. Errors block CI; warnings stay informational.
+3. **Build project graph** — Removed `vitest.config.ts` from `tsconfig.node.json#include` (client-only) and the equivalent web `tsconfig.json#include` (hono, express). Vite 6 plugin types vs Vitest 2 plugin types disagree there during `tsc -b`; Vitest typechecks its own config at test time so the build doesn't need to.
+4. **RTL cleanup** — Extended every preset's `setupTests.ts` to register an explicit `afterEach(cleanup)`. RTL's auto-cleanup with Vitest is historically flaky and surfaced as "duplicate elements" in tests on the first real test-drive.
+
+**Reasoning:** All four trace back to scaffold templates or default settings, not to project customisation. Catching them now means the next scaffold doesn't repeat the work.
+
+**Rejected alternatives:** More aggressive action-version bumps (the launcher project bumped setup-node and pnpm/action-setup to `@v6`, but those majors aren't confirmed stable in our reference — chose conservative + Renovate over speculative bumps).
+
+## 2026-05-09: Local dev shell is Windows PowerShell
+
+**Decision:** Templates and per-project agent rules call out that local dev runs on Windows PowerShell (5.1 or 7). The per-project `AGENTS.md` includes a hard rule banning `&&`/`||` chains and bash-only env-var syntax in interactively-run commands. `docs/AGENT_REFERENCE.md` carries the bash↔PowerShell cheatsheet.
+
+**Reasoning:** Agents kept generating bash command chains that fail in PowerShell 5.1, costing the user time during local dev. Making the platform constraint explicit at the every-turn ruleset level (with the cheatsheet on demand) prevents the failure mode without adding much token cost.
+
+**Scope:** Applies to commands run interactively at the local dev shell. Commands inside `Dockerfile`, `.github/workflows/*.yml`, and `package.json` scripts can keep bash syntax — they execute in Linux containers / via npm's cmd.exe shell, which both support `&&`.
+
 ## 2026-05-09: Versioning + Docker tag pattern universal
 
 **Decision:** All presets enforce `MAJOR.MINOR.PATCH` bumps for behaviour-affecting changes and tag Docker images as both `<docker_namespace>/<project_slug>:<version>` and `:latest`.

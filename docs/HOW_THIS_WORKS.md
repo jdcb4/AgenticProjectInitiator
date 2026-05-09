@@ -29,12 +29,25 @@ _ProjectInitiation/
 
 ## Scaffold flow
 
-1. User creates an empty target folder and runs `pnpm dlx tsx <base>/scripts/init.ts`.
-2. The CLI checks the target is empty (ignoring `.git`).
-3. It asks for `projectName`, `presetId`, `dockerNamespace`.
-4. It builds a variables map: `project_name`, `project_slug`, `docker_namespace`, `preset_id`, `preset_label`, `deploy_targets`, `year`.
+The CLI supports two modes:
+
+- **Non-interactive** (agents, CI): `--name "..." --preset <id> --docker-namespace <ns> --yes`. All required flags must be present.
+- **Interactive** (humans at a terminal): no flags, prompts walk through each value.
+
+You can mix — any flag passed is used, anything missing is prompted for, but only when stdin is a TTY. If stdin is not a TTY and a flag is missing, the scaffolder exits with code 2 and a message listing what's missing. Likewise, a non-TTY run without `--yes` exits because the confirmation prompt cannot be satisfied.
+
+Steps after flag parsing:
+
+1. The CLI checks the target is empty (ignoring `.git`).
+2. It collects `projectName`, `presetId`, `dockerNamespace` from flags or prompts.
+3. It builds a variables map: `project_name`, `project_slug`, `docker_namespace`, `preset_id`, `preset_label`, `deploy_targets`, `year`.
+4. It confirms (or skips confirmation if `--yes`).
 5. It copies `initial_config/_shared/` first, then `initial_config/<preset>/` over the top. Files ending `.tmpl` are rendered through a `{{variable}}` substituter; files without `.tmpl` are copied verbatim.
 6. It prints next steps.
+
+### Why dual-mode
+
+A single interactive flow looks human-friendly but breaks in agent sessions: piped stdin races against the prompt library, characters get merged across fields (the `y` of a confirmation prompt collides with the previous text input). The non-interactive path bypasses the prompt library entirely and is the only deterministic option for agents and CI.
 
 ## Template rules
 
@@ -80,4 +93,4 @@ pnpm install
 pnpm run test:scaffold
 ```
 
-This materialises every preset into a temp folder and checks the required-files contract. It does **not** run `pnpm install` inside the materialised projects (that's slow and bandwidth-heavy). To run the full chain manually, scaffold into a real folder and run `pnpm install && pnpm run verify` there.
+This materialises every preset into a temp folder and checks the required-files contract. It does **not** run `pnpm install` inside the materialised projects (that's slow and bandwidth-heavy). To run the full chain manually, scaffold into a real folder, then run `pnpm install` and `pnpm run verify` (separately, since the local dev shell is Windows PowerShell which doesn't support `&&` chains).

@@ -5,7 +5,8 @@
       "Bash(pnpm --version)",
       "Bash(corepack prepare *)",
       "Bash(npx --yes tsx@4.19.2 scripts/test-scaffold.ts)",
-      "Bash(npx --yes tsx@4.19.2 inspect.mjs)"
+      "Bash(npx --yes tsx@4.19.2 inspect.mjs)",
+      "Bash(pnpm run *)"
     ]
   }
 }

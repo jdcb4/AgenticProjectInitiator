@@ -22,7 +22,7 @@ If the reason holds:
    ```
 5. **Add deploy docs** at `initial_config/<id>/docs/DEPLOYMENT.md.tmpl`.
 6. **Run the smoke test:** `pnpm run test:scaffold`. Add new required-file expectations if your preset introduces them.
-7. **Manually scaffold** into a throwaway folder and run `pnpm install && pnpm run verify` end-to-end.
+7. **Manually scaffold** into a throwaway folder, then run `pnpm install` followed by `pnpm run verify` (separately — local dev is Windows PowerShell, no `&&` chains).
 8. **Document the decision** in `docs/DECISIONS.md` here in the base — what the preset is for, why the existing three were insufficient, what tooling diverges and why.
 
 ## Things to keep consistent

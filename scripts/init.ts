@@ -2,28 +2,101 @@
 /**
  * Project Initiation scaffolder.
  *
- * Asks for a project name and a preset, then materialises a new project in the
- * current working directory by copying:
- *   1. initial_config/_shared/   (rendered templates)
- *   2. initial_config/<preset>/  (preset-specific files)
+ * Two modes:
+ *
+ * 1. Non-interactive (recommended for agents and CI):
+ *
+ *      pnpm dlx tsx <base>/scripts/init.ts \
+ *        --name "My Project" \
+ *        --preset client-only \
+ *        --docker-namespace jdcb4 \
+ *        --yes
+ *
+ *    All required flags must be present. Exits non-zero with an explanatory
+ *    error if any are missing and stdin is not a TTY.
+ *
+ * 2. Interactive (humans):
+ *
+ *      pnpm dlx tsx <base>/scripts/init.ts
+ *
+ *    Prompts for any flags not already passed. `--yes` still skips the final
+ *    confirmation.
  */
 
 import { existsSync, readdirSync } from "node:fs";
 import { resolve } from "node:path";
 import process from "node:process";
+import { parseArgs } from "node:util";
 import { fileURLToPath } from "node:url";
 import prompts from "prompts";
 
-import { loadPresets } from "./lib/presets.ts";
+import { loadPresets, type PresetConfig } from "./lib/presets.ts";
 import { copyTree } from "./lib/copy.ts";
-import { confirmDestination, slugify } from "./lib/prompts.ts";
+import { slugify } from "./lib/prompts.ts";
 
 const baseDir = resolve(fileURLToPath(import.meta.url), "..", "..");
 const initialConfigDir = resolve(baseDir, "initial_config");
 
+interface CliFlags {
+  name?: string;
+  preset?: string;
+  dockerNamespace?: string;
+  yes: boolean;
+  help: boolean;
+}
+
+function parseFlags(): CliFlags {
+  const { values } = parseArgs({
+    options: {
+      name: { type: "string" },
+      preset: { type: "string" },
+      "docker-namespace": { type: "string" },
+      yes: { type: "boolean", short: "y", default: false },
+      help: { type: "boolean", short: "h", default: false },
+    },
+    strict: true,
+    allowPositionals: false,
+  });
+  return {
+    name: values.name as string | undefined,
+    preset: values.preset as string | undefined,
+    dockerNamespace: values["docker-namespace"] as string | undefined,
+    yes: Boolean(values.yes),
+    help: Boolean(values.help),
+  };
+}
+
+function printUsage(presets: Record<string, PresetConfig>): void {
+  const presetIds = Object.keys(presets).join(" | ");
+  console.log(`
+Project Initiation scaffolder
+
+Usage:
+  init.ts [options]
+
+Options:
+  --name <string>              Project name (human-readable). Required if non-interactive.
+  --preset <id>                One of: ${presetIds}. Required if non-interactive.
+  --docker-namespace <string>  Docker Hub namespace for image tags. Default: jdcb4.
+  --yes, -y                    Skip the final confirmation prompt.
+  --help, -h                   Show this help.
+
+Run with no flags for an interactive session (humans).
+Pass all required flags for a non-interactive session (agents, CI).
+`);
+}
+
 async function main(): Promise<void> {
+  const flags = parseFlags();
   const presets = loadPresets(initialConfigDir);
+
+  if (flags.help) {
+    printUsage(presets);
+    return;
+  }
+
   const targetDir = process.cwd();
+  const isTTY = Boolean(process.stdin.isTTY);
 
   console.log("\nProject Initiation scaffolder\n");
   console.log(`  Base:    ${baseDir}`);
@@ -37,62 +110,126 @@ async function main(): Promise<void> {
     process.exit(1);
   }
 
-  const answers = await prompts(
-    [
-      {
-        type: "text",
-        name: "projectName",
-        message: "Project name (human-readable):",
-        validate: (value: string) =>
-          value.trim().length >= 2 || "At least 2 characters",
-      },
-      {
-        type: "select",
-        name: "presetId",
-        message: "Pick a preset:",
-        choices: Object.entries(presets).map(([id, preset]) => ({
-          title: id,
-          description: preset.description,
-          value: id,
-        })),
-      },
-      {
-        type: "text",
-        name: "dockerNamespace",
-        message: "Docker Hub namespace (used for image tags):",
-        initial: "jdcb4",
-      },
-    ],
-    {
-      onCancel: () => {
-        console.log("\nAborted.");
-        process.exit(1);
-      },
-    },
-  );
+  const presetIds = Object.keys(presets);
 
-  const preset = presets[answers.presetId];
-  if (!preset) {
-    console.error(`Unknown preset: ${answers.presetId}`);
+  // Validate any pre-supplied preset against the registry.
+  if (flags.preset && !presets[flags.preset]) {
+    console.error(
+      `Unknown preset: ${flags.preset}\nAvailable: ${presetIds.join(", ")}`,
+    );
     process.exit(1);
   }
 
-  const projectName: string = answers.projectName.trim();
+  // Non-interactive path: all required flags must be present.
+  const missing: string[] = [];
+  if (!flags.name) missing.push("--name");
+  if (!flags.preset) missing.push("--preset");
+
+  let projectName = flags.name?.trim();
+  let presetId = flags.preset;
+  let dockerNamespace = flags.dockerNamespace?.trim();
+
+  if (missing.length > 0) {
+    if (!isTTY) {
+      console.error(
+        `Missing required flag(s): ${missing.join(", ")}\n` +
+          `\nNon-interactive mode is required when stdin is not a TTY.\n` +
+          `Re-run with all of:\n` +
+          `  --name "<project name>"\n` +
+          `  --preset <${presetIds.join(" | ")}>\n` +
+          `  --docker-namespace <namespace>   (optional, default: jdcb4)\n` +
+          `  --yes                            (optional, skips confirmation)\n`,
+      );
+      process.exit(2);
+    }
+
+    const answers = await prompts(
+      [
+        flags.name === undefined && {
+          type: "text",
+          name: "projectName",
+          message: "Project name (human-readable):",
+          validate: (value: string) =>
+            value.trim().length >= 2 || "At least 2 characters",
+        },
+        flags.preset === undefined && {
+          type: "select",
+          name: "presetId",
+          message: "Pick a preset:",
+          choices: Object.entries(presets).map(([id, preset]) => ({
+            title: id,
+            description: preset.description,
+            value: id,
+          })),
+        },
+        flags.dockerNamespace === undefined && {
+          type: "text",
+          name: "dockerNamespace",
+          message: "Docker Hub namespace (used for image tags):",
+          initial: "jdcb4",
+        },
+      ].filter(Boolean) as prompts.PromptObject[],
+      {
+        onCancel: () => {
+          console.log("\nAborted.");
+          process.exit(1);
+        },
+      },
+    );
+
+    projectName = projectName ?? (answers.projectName as string).trim();
+    presetId = presetId ?? (answers.presetId as string);
+    dockerNamespace = dockerNamespace ?? (answers.dockerNamespace as string);
+  }
+
+  // Default the docker namespace if it was never supplied.
+  if (!dockerNamespace) dockerNamespace = "jdcb4";
+
+  if (!projectName || projectName.length < 2) {
+    console.error("Project name must be at least 2 characters.");
+    process.exit(1);
+  }
+
+  const preset = presets[presetId!];
+  if (!preset) {
+    console.error(`Unknown preset: ${presetId}`);
+    process.exit(1);
+  }
+
   const projectSlug = slugify(projectName);
 
   const variables: Record<string, string> = {
     project_name: projectName,
     project_slug: projectSlug,
-    docker_namespace: answers.dockerNamespace,
-    preset_id: answers.presetId,
+    docker_namespace: dockerNamespace,
+    preset_id: presetId!,
     preset_label: preset.vars.preset_label,
     deploy_targets: preset.vars.deploy_targets,
     year: String(new Date().getFullYear()),
   };
 
-  if (!(await confirmDestination(targetDir, projectName, answers.presetId))) {
-    console.log("Aborted.");
-    process.exit(1);
+  // Confirmation: ask interactively unless --yes was passed.
+  if (!flags.yes) {
+    if (!isTTY) {
+      console.error(
+        "Non-interactive run requires --yes to confirm scaffolding.",
+      );
+      process.exit(2);
+    }
+    const ok = await prompts({
+      type: "confirm",
+      name: "ok",
+      message: `Scaffold "${projectName}" using preset "${presetId}" into ${targetDir}?`,
+      initial: true,
+    });
+    if (!ok.ok) {
+      console.log("Aborted.");
+      process.exit(1);
+    }
+  } else {
+    console.log(
+      `Scaffolding "${projectName}" using preset "${presetId}" into ${targetDir}.`,
+    );
   }
 
   if (preset.shared) {

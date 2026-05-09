@@ -17,23 +17,46 @@ A template base for agentically-driven web development projects. It scaffolds on
 
 ## Scaffolding a new project
 
+The scaffolder has two modes. **Use flags whenever possible** — the interactive mode is friendly for humans at a terminal but can be fragile if invoked indirectly.
+
+### Non-interactive (recommended for agents and CI)
+
 ```powershell
-# 1. Create and enter the target folder
 mkdir C:\CodingProjects\my-new-app
 cd C:\CodingProjects\my-new-app
 
-# 2. Run the scaffolder from this base
-pnpm dlx tsx C:\CodingProjects\_ProjectInitiation\scripts\init.ts
+pnpm dlx tsx C:\CodingProjects\_ProjectInitiation\scripts\init.ts `
+  --name "My New App" `
+  --preset client-only `
+  --docker-namespace jdcb4 `
+  --yes
 
-# 3. Answer the two prompts (project name, preset)
-# 4. Install and verify
 pnpm install
 pnpm run verify
 ```
 
+`--preset` must be one of: `client-only`, `hono-cloudflare`, `express-fullstack`. `--yes` skips the confirmation prompt; without it the scaffolder still asks "scaffold here? y/n" interactively. If `stdin` is not a TTY, `--yes` is required.
+
+### Interactive (humans at a terminal)
+
+```powershell
+mkdir C:\CodingProjects\my-new-app
+cd C:\CodingProjects\my-new-app
+
+pnpm dlx tsx C:\CodingProjects\_ProjectInitiation\scripts\init.ts
+# Asks for project name, preset, docker namespace, then confirms.
+
+pnpm install
+pnpm run verify
+```
+
+You can mix the two modes — pass any flags you already know and the scaffolder will only prompt for what's missing.
+
+`--help` lists every flag.
+
 ## Scaffolding via an agent
 
-The fastest path is to paste the bootstrap prompt from `docs/BOOTSTRAP_PROMPT.md` into a fresh Claude Code session opened in the target folder. The agent reads the prompt, runs the scaffolder, and then customizes the project per your spec.
+The fastest path is to paste the bootstrap prompt from `docs/BOOTSTRAP_PROMPT.md` into a fresh Claude Code session opened in the target folder. The prompt instructs the agent to use the non-interactive flag form, install, verify, and customise per your spec.
 
 ## What the base contains
 

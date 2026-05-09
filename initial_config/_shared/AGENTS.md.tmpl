@@ -34,6 +34,7 @@ If docs are missing, stale, or inconsistent with the code, fix them as part of t
 6. **Do not implement roadmap items unless the user moves them into active work.** Out-of-scope ideas go into `docs/ROADMAP.md`.
 7. **Do not commit secrets, build output, `node_modules`, or local env files.** See `.gitignore` and `SECURITY.md`.
 8. **Do not weaken or skip tests to make them pass.** Fix the underlying issue.
+9. **Local dev is Windows PowerShell.** When running shell commands locally use PowerShell syntax (no `&&`/`||` chains, env vars are `$env:NAME`, line continuation is backtick). CI and Docker run on Linux bash — that's fine, just don't conflate the two. Cheatsheet in `docs/AGENT_REFERENCE.md`.
 
 ## Deterministic checks before commit
 

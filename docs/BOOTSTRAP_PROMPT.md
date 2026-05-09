@@ -1,6 +1,6 @@
 # Bootstrap Prompt
 
-Paste the prompt below into a fresh Claude Code session opened in the **target project folder** (an empty directory you want to become your new project). The agent reads it, runs the scaffolder, then customises the project per your spec.
+Paste the prompt below into a fresh Claude Code session opened in the **target project folder** (an empty directory you want to become your new project). The agent reads it, runs the scaffolder non-interactively (no piping, no stdin races), then customises the project per your spec.
 
 > Replace the placeholders in `<<…>>` with your actual answers before pasting.
 
@@ -9,19 +9,19 @@ Paste the prompt below into a fresh Claude Code session opened in the **target p
 ```text
 You are starting a new project from an empty folder.
 
-Step 1 — Scaffold
+Step 1 — Scaffold (non-interactive, single command)
 
-Run:
+Run this exact command. It uses CLI flags so there are NO interactive prompts to negotiate. Do not pipe stdin or use timed writes.
 
-  pnpm dlx tsx C:\CodingProjects\_ProjectInitiation\scripts\init.ts
+  pnpm dlx tsx C:\CodingProjects\_ProjectInitiation\scripts\init.ts --name "<<project name, e.g. "Word Game">>" --preset <<one of: client-only | hono-cloudflare | express-fullstack>> --docker-namespace jdcb4 --yes
 
-Answer the prompts:
+Notes:
+- --name must be quoted if it contains spaces.
+- --preset must be exactly one of: client-only, hono-cloudflare, express-fullstack.
+- --yes skips the confirmation prompt; required because stdin is not a TTY in agent sessions.
+- The scaffolder refuses to run if the working directory is not empty (.git is allowed).
 
-- Project name: <<project name, e.g. "Word Game">>
-- Preset: <<one of: client-only | hono-cloudflare | express-fullstack>>
-- Docker Hub namespace: <<your docker namespace, default "jdcb4">>
-
-After the scaffolder completes, the working directory contains a complete project. Do NOT rerun the scaffolder.
+After it completes the working directory contains a complete project. Do NOT rerun the scaffolder.
 
 Step 2 — Verify the scaffold
 
@@ -72,3 +72,7 @@ When you finish customising, run `pnpm run verify` and report:
 - **Pick the preset deliberately.** Reread `README.md` if unsure. Picking the wrong preset is more painful than starting over.
 - **Open the new folder in a fresh editor window** before running the prompt so the agent's context is the project, not the base.
 - **The scaffolder refuses to run on a non-empty folder** (`.git` is the one exception). If you've already initialised git, that's fine.
+
+## Why non-interactive
+
+The scaffolder also supports an interactive mode (`pnpm dlx tsx <base>/scripts/init.ts` with no flags), which prompts a human one question at a time. That mode is for humans at a real terminal — agents should always use the flag form because piped stdin races against the prompt library and can corrupt the project name. The flags above bypass prompts entirely.

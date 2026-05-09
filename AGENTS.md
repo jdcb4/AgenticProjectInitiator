@@ -40,6 +40,7 @@ The result is a self-sufficient project with its own `AGENTS.md`, `/docs`, `pack
 3. **Keep AGENTS.md (this file and the per-project template) short.** Detailed reference material lives in `docs/AGENT_REFERENCE.md` so it is not paid on every turn.
 4. **Do not add a fourth preset, change the toolchain default, or introduce a new shared library** without a documented decision in `docs/DECISIONS.md`.
 5. **Test the scaffolder after meaningful changes** by running it into a throwaway folder and verifying the result installs, typechecks, lints, tests, and builds.
+6. **Local dev is Windows PowerShell.** When running shell commands locally use PowerShell syntax (no `&&`/`||` chains, env vars are `$env:NAME`). The per-project `docs/AGENT_REFERENCE.md` template has the full cheatsheet — keep it accurate.
 
 ## First-step orientation when editing this base
 
