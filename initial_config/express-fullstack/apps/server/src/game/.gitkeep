@@ -1,0 +1,10 @@
+# Domain modules go here.
+#
+# Example structure for a multiplayer word game:
+#   GameRoom.ts
+#   scoring.ts
+#   turnLogic.ts
+#   skipLogic.ts
+#   stateTransitions.ts
+#
+# Keep this folder framework-independent. No Express, no Socket.io imports here.

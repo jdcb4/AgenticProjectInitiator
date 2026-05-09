@@ -1,0 +1,75 @@
+# Deployment — {{project_name}}
+
+This monorepo deploys two surfaces:
+
+- **API** — Hono on Cloudflare Workers via Wrangler.
+- **Web** — Vite static build, hostable on Cloudflare Pages, GitHub Pages, or Docker/Nginx.
+
+## API: Cloudflare Workers
+
+One-time setup:
+
+```bash
+pnpm --filter @{{project_slug}}/api exec wrangler login
+```
+
+Configure bindings in `apps/api/wrangler.toml` (KV, D1, R2, Durable Objects, etc.) before deploying.
+
+Deploy:
+
+```bash
+pnpm run deploy:api
+```
+
+Local dev:
+
+```bash
+pnpm --filter @{{project_slug}}/api run dev
+```
+
+The web app's `vite.config.ts` proxies `/api/*` to `http://localhost:8787` so you can run both surfaces concurrently with:
+
+```bash
+pnpm dev
+```
+
+## Web: Cloudflare Pages (recommended)
+
+Connect the repo in the Cloudflare dashboard with these settings:
+
+- Build command: `pnpm install && pnpm --filter @{{project_slug}}/web run build`
+- Build output directory: `apps/web/dist`
+
+Set `VITE_API_BASE_URL` in Pages environment variables to the deployed Workers URL.
+
+## Web: Docker fallback
+
+```bash
+pnpm run docker:build
+docker run --rm -p 8080:80 {{docker_namespace}}/{{project_slug}}:latest
+```
+
+Tags produced:
+
+```text
+{{docker_namespace}}/{{project_slug}}:<package version>
+{{docker_namespace}}/{{project_slug}}:latest
+```
+
+## Verification
+
+```bash
+pnpm run verify
+```
+
+For Workers config changes:
+
+```bash
+pnpm --filter @{{project_slug}}/api exec wrangler deploy --dry-run
+```
+
+For Docker changes:
+
+```bash
+pnpm run docker:build
+```

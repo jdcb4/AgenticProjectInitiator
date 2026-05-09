@@ -1,0 +1,68 @@
+# Deployment — {{project_name}}
+
+This is a static browser app. No server-side state, no database, no API.
+
+## Local production preview
+
+```bash
+pnpm run build
+pnpm run preview
+```
+
+`pnpm run build` typechecks and writes the static app to `dist`.
+
+## Docker
+
+Build the image with the project script (it tags both versioned and `latest`):
+
+```bash
+pnpm run docker:build
+```
+
+Tags produced:
+
+```text
+{{docker_namespace}}/{{project_slug}}:<package version>
+{{docker_namespace}}/{{project_slug}}:latest
+```
+
+Run locally:
+
+```bash
+docker run --rm -p 8080:80 {{docker_namespace}}/{{project_slug}}:latest
+```
+
+Open http://127.0.0.1:8080/.
+
+The image serves the Vite `dist` output through Nginx with SPA fallback to `index.html`.
+
+## GitHub Pages
+
+The workflow is `.github/workflows/pages.yml`.
+
+Repository setup (one-time):
+
+1. Push the project to GitHub.
+2. Open `Settings → Pages`.
+3. Set `Build and deployment` source to `GitHub Actions`.
+4. Push to `main` (or run the workflow manually).
+
+The Pages base path is set in `vite.config.ts` and currently uses `/{{project_slug}}/`. If the GitHub repository name differs from the project slug, update the `base` value in `vite.config.ts` and run `pnpm run build:pages` to verify.
+
+## Verification before deploy
+
+```bash
+pnpm run verify
+```
+
+For Pages-specific changes also run:
+
+```bash
+pnpm run build:pages
+```
+
+For Docker-specific changes also run:
+
+```bash
+pnpm run docker:build
+```

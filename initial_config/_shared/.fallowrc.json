@@ -1,0 +1,14 @@
+{
+  "$schema": "https://fallow.dev/schema.json",
+  "entrypoints": ["src/**/*.{ts,tsx}"],
+  "tests": ["src/**/*.test.{ts,tsx}", "tests/**/*.{ts,tsx}"],
+  "scripts": ["scripts/**/*.{ts,mjs,js}"],
+  "ignore": [
+    "**/*.generated.*",
+    "dist/**",
+    "build/**",
+    "coverage/**",
+    ".turbo/**",
+    ".wrangler/**"
+  ]
+}

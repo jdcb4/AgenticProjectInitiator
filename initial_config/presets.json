@@ -1,0 +1,45 @@
+{
+  "$schema": "./presets.schema.json",
+  "presets": {
+    "client-only": {
+      "description": "Static React client-only app: Vite + React + TS + Tailwind + shadcn. Deploys to GitHub Pages and Docker/Nginx.",
+      "shared": true,
+      "source": "client-only",
+      "vars": {
+        "preset_label": "Client-only React app",
+        "preset_id": "client-only",
+        "deploy_targets": "GitHub Pages, Docker"
+      }
+    },
+    "hono-cloudflare": {
+      "description": "pnpm monorepo: Vite + React frontend, Hono API on Cloudflare Workers, shared Zod schemas in packages/shared.",
+      "shared": true,
+      "source": "hono-cloudflare",
+      "vars": {
+        "preset_label": "Hono on Cloudflare + React frontend",
+        "preset_id": "hono-cloudflare",
+        "deploy_targets": "Cloudflare Workers (api), Cloudflare Pages or GitHub Pages (web)"
+      }
+    },
+    "express-fullstack": {
+      "description": "pnpm monorepo: Vite + React frontend, Express 5 backend with Socket.io scaffolding, shared Zod schemas. Railway and Docker deploy.",
+      "shared": true,
+      "source": "express-fullstack",
+      "vars": {
+        "preset_label": "Express 5 fullstack",
+        "preset_id": "express-fullstack",
+        "deploy_targets": "Railway, Docker"
+      }
+    }
+  },
+  "templateExtension": ".tmpl",
+  "variables": [
+    "project_name",
+    "project_slug",
+    "docker_namespace",
+    "preset_id",
+    "preset_label",
+    "deploy_targets",
+    "year"
+  ]
+}

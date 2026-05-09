@@ -1,0 +1,12 @@
+# Database modules go here when the project moves beyond JSON files.
+#
+# Default per docs/AGENT_REFERENCE.md:
+#   1. JSON files in src/data (use this until it stops being suitable).
+#   2. Drizzle + SQLite for dev, Postgres for production.
+#
+# Suggested layout when adopted:
+#   schema.ts      Drizzle schema definitions
+#   client.ts      Connection / client export
+#   migrations/    Drizzle-kit migration files
+#
+# Document the move from JSON to a database in docs/DECISIONS.md.

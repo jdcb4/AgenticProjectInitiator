@@ -1,0 +1,29 @@
+# Decisions
+
+Durable architecture and tooling decisions for {{project_name}}. ADR-lite format: each entry is dated, names the decision, the reasoning, and any rejected alternatives.
+
+When adding a new entry, append to the bottom and keep the most recent decisions visible. Do not delete past decisions; supersede them with a new entry that links back.
+
+## Format
+
+```
+## YYYY-MM-DD: <decision title>
+
+**Decision:** <one sentence>
+
+**Reasoning:** <why this won>
+
+**Rejected alternatives:** <what else was considered and why not>
+
+**Supersedes:** <link to a prior decision, if applicable>
+```
+
+---
+
+## {{year}}-01-01: Scaffolded from the `{{preset_id}}` preset
+
+**Decision:** Use the `{{preset_label}}` defaults from the Project Initiation base.
+
+**Reasoning:** Matches the project's expected shape ({{deploy_targets}}). Keeps tooling consistent with other projects scaffolded from the same base, reducing context-switching and giving agents predictable structure.
+
+**Rejected alternatives:** Alternative presets in the base were not chosen because they target different deployment shapes or backend requirements.

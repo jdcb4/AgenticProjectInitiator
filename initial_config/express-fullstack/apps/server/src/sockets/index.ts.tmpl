@@ -1,0 +1,20 @@
+import type { Server as IOServer, Socket } from "socket.io";
+import { PingSchema } from "@{{project_slug}}/shared/events";
+
+/**
+ * Socket.io entry point. Wire real-time event handlers here when the project
+ * needs them. Keep business logic out of socket handlers — delegate to modules
+ * under `src/game/` (or your equivalent domain folder) and return results.
+ */
+export function registerSockets(io: IOServer): void {
+  io.on("connection", (socket: Socket) => {
+    socket.on("ping", (raw) => {
+      const ping = PingSchema.safeParse(raw);
+      if (!ping.success) {
+        socket.emit("error", { message: "Invalid ping payload" });
+        return;
+      }
+      socket.emit("pong", { at: new Date().toISOString() });
+    });
+  });
+}

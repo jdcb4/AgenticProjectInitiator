@@ -1,0 +1,30 @@
+import { useQuery } from "@tanstack/react-query";
+import { HealthResponseSchema } from "@{{project_slug}}/shared/schemas";
+
+export function App() {
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ["health"],
+    queryFn: async () => {
+      const res = await fetch("/api/health");
+      const json = await res.json();
+      return HealthResponseSchema.parse(json);
+    },
+  });
+
+  return (
+    <main className="min-h-dvh flex flex-col items-center justify-center px-6 text-center">
+      <h1 className="text-3xl font-semibold tracking-tight">{{project_name}}</h1>
+      <p className="mt-3 max-w-prose text-neutral-400">
+        Scaffolded from the Hono on Cloudflare preset.
+      </p>
+      <p className="mt-6 font-mono text-sm text-neutral-300">
+        API:{" "}
+        {isLoading
+          ? "checking…"
+          : isError
+            ? "unreachable"
+            : `ok (${data?.timestamp})`}
+      </p>
+    </main>
+  );
+}

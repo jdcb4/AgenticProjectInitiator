@@ -1,0 +1,64 @@
+# Deployment — {{project_name}}
+
+This is a fullstack monorepo: Express server (with Socket.io) and a Vite React web app. The Docker image bundles both — the server serves the built web assets — so a single Railway service is enough.
+
+## Local development
+
+Run server and web concurrently:
+
+```bash
+pnpm dev
+```
+
+- Web dev server: http://localhost:5173 (proxies `/api` and `/socket.io` to the server)
+- API dev server: http://localhost:3000
+
+## Local production
+
+```bash
+pnpm run build
+pnpm --filter @{{project_slug}}/server start
+```
+
+## Docker
+
+```bash
+pnpm run docker:build
+docker run --rm -p 3000:3000 {{docker_namespace}}/{{project_slug}}:latest
+```
+
+Tags produced:
+
+```text
+{{docker_namespace}}/{{project_slug}}:<package version>
+{{docker_namespace}}/{{project_slug}}:latest
+```
+
+`docker-compose.yml` is provided for local stacks (and includes a commented Postgres service for when the project moves beyond JSON files).
+
+## Railway
+
+Railway deploys from the GitHub repo using `railway.toml`. One-time setup:
+
+1. Push the project to GitHub.
+2. In Railway, create a new project from the repository.
+3. Set environment variables: `NODE_ENV=production`, `PORT` (Railway sets this automatically), `LOG_LEVEL`, `CORS_ORIGIN` (your public URL).
+4. Railway picks up `railway.toml` and builds with the Dockerfile.
+5. Subsequent pushes to the configured branch trigger redeploys.
+
+The Dockerfile exposes port 3000 and the start command is `node dist/server.js`. Healthcheck is `/health`.
+
+## Verification
+
+```bash
+pnpm run verify
+```
+
+For Docker / Railway changes also run:
+
+```bash
+pnpm run docker:build
+docker run --rm -p 3000:3000 {{docker_namespace}}/{{project_slug}}:latest
+# in another terminal:
+curl http://localhost:3000/health
+```

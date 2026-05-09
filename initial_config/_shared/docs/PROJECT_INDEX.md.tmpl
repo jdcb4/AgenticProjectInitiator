@@ -1,0 +1,54 @@
+# Project Index — {{project_name}}
+
+The first stop for navigating this project.
+
+## What this project is
+
+{{preset_label}}.
+
+> Replace this paragraph with a one-paragraph description of the actual product when the agent first customises the project.
+
+## Important folders
+
+> Update this list as the project gains real folders. The defaults below come from the `{{preset_id}}` preset.
+
+- `src/app` — app shell, routing, top-level orchestration.
+- `src/features` — feature-specific UI and orchestration.
+- `src/components/ui` — shadcn-style reusable visual primitives.
+- `src/domain` — framework-independent business rules.
+- `src/services` — IO wrappers (storage, HTTP, filesystem).
+- `src/data` — local static data, JSON, fixtures.
+- `src/config` — typed config and environment parsing.
+- `src/lib` — small generic helpers.
+- `src/tests` — shared test setup and integration tests.
+- `docs` — durable project documentation.
+- `scripts` — deterministic project utility scripts.
+
+## Commands
+
+| Command                 | Purpose                                                  |
+| ----------------------- | -------------------------------------------------------- |
+| `pnpm run dev`          | Start the development server.                            |
+| `pnpm run typecheck`    | TypeScript checking.                                     |
+| `pnpm run lint`         | ESLint.                                                  |
+| `pnpm test`             | Vitest once.                                             |
+| `pnpm run test:watch`   | Vitest in watch mode.                                    |
+| `pnpm run build`        | Production build.                                        |
+| `pnpm run verify`       | Typecheck + lint + test + build (commit gate).           |
+| `pnpm dlx fallow ...`   | Deterministic dead-code / complexity / duplication scan. |
+
+Add preset-specific scripts (Docker build, deploy preview, words pipeline, etc.) here as they're introduced.
+
+## Key docs
+
+- [`AGENTS.md`](../AGENTS.md) — the every-turn agent ruleset.
+- [`docs/AGENT_REFERENCE.md`](AGENT_REFERENCE.md) — detailed agent reference.
+- [`docs/AGENT_PROMPTS.md`](AGENT_PROMPTS.md) — canonical re-usable task prompts.
+- [`docs/ARCHITECTURE.md`](ARCHITECTURE.md) — module boundaries and runtime shape.
+- [`docs/VERIFICATION.md`](VERIFICATION.md) — required checks before commit.
+- [`docs/VERSIONING.md`](VERSIONING.md) — version rules.
+- [`docs/DECISIONS.md`](DECISIONS.md) — durable decisions (ADR-lite).
+- [`docs/ROADMAP.md`](ROADMAP.md) — future ideas only, not active work.
+- [`docs/CHANGELOG.md`](CHANGELOG.md) — notable changes by version.
+- [`docs/DEPLOYMENT.md`](DEPLOYMENT.md) — deploy instructions.
+- [`SECURITY.md`](../SECURITY.md) — security rules.
