@@ -2,6 +2,19 @@
 
 Durable decisions about the Project Initiation base itself. ADR-lite format. Newest decisions append to the bottom.
 
+## 2026-05-10: Design token system across web presets
+
+**Decision:** Every web preset (client-only, hono-cloudflare/web, express-fullstack/web) now ships with a four-layer design token system: `src/styles/tokens.css` (CSS variables for all colour, typography, radii — light + dark), `tailwind.config.ts` (semantic class names mapped to those vars via the `<alpha-value>` placeholder), `src/components/ui/typography.tsx` and `src/components/ui/surface.tsx` (primitives the rest of the app uses), and `docs/DESIGN_TOKENS.md` (the rules and how to extend). A new hard rule (#10) in the per-project `AGENTS.md` forbids raw Tailwind palette / size / weight classes in feature code.
+
+**Reasoning:** The user wants central control of UX (font, font size, tracking, colour) with no in-place computation. The default Tailwind workflow encourages the opposite — utility classes scattered across components. Tokens + primitives let a single change in `tokens.css` reflow the whole app, support theme switching, and let agents propose UI work without making style decisions. The shadcn convention (`hsl(var(--…) / <alpha-value>)`) is preserved underneath so `npx shadcn add` keeps working; the semantic layer sits on top.
+
+**Rejected alternatives:**
+- *Replace shadcn's CSS variable names with our own.* Would break shadcn add commands and force us to rewrite any pre-styled components — high friction for marginal gain.
+- *A heavier solution (Vanilla Extract, Panda, Stitches).* Overkill for the user's preset scope; would diverge from Tailwind expertise users already have.
+- *Pre-built theme variants beyond light/dark.* Premature; the system supports them but no project has asked.
+
+**Default theme:** Dark by default (matches the prior scaffold's hardcoded dark look). Toggle by removing `class="dark"` from `<html>` in `index.html`.
+
 ## 2026-05-10: Separate `repo_name` from `project_slug`
 
 **Decision:** Added a `repo_name` template variable (and a `--repo-name` CLI flag / interactive prompt) distinct from `project_slug`. `repo_name` is case-preserving and defaults to the slug; it is used in `vite.config.ts` for the GitHub Pages `base` URL and in the deployment doc's example URL. `project_slug` remains lowercase kebab-case for npm package names and Docker image tags.

@@ -1,0 +1,142 @@
+/*
+ * Design tokens — single source of truth for visual style.
+ *
+ * RULES (see docs/DESIGN_TOKENS.md and AGENTS.md):
+ *   1. Every colour, type setting, radius, and tracking value lives here.
+ *   2. Components reference these via Tailwind's semantic classes
+ *      (bg-surface-raised, text-text-secondary, text-h2, etc.) — never raw
+ *      Tailwind palette classes (bg-blue-500, text-3xl, font-bold).
+ *   3. Derivations (hover states, tints) live HERE as additional tokens.
+ *      Do not compute colours at the call site.
+ *
+ * Format: HSL triplets (no hsl() wrapper) so Tailwind opacity modifiers like
+ * `bg-surface-raised/50` work via the <alpha-value> placeholder.
+ */
+
+:root {
+  /* shadcn-compatible primitives — keep so `npx shadcn add <component>` works */
+  --background: 0 0% 100%;
+  --foreground: 222 47% 11%;
+  --card: 0 0% 100%;
+  --card-foreground: 222 47% 11%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 222 47% 11%;
+  --primary: 222 47% 11%;
+  --primary-foreground: 210 40% 98%;
+  --secondary: 210 40% 96%;
+  --secondary-foreground: 222 47% 11%;
+  --muted: 210 40% 96%;
+  --muted-foreground: 215 16% 47%;
+  --accent: 210 40% 96%;
+  --accent-foreground: 222 47% 11%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 214 32% 91%;
+  --input: 214 32% 91%;
+  --ring: 222 47% 11%;
+
+  /* === Semantic colour layer (use these in components) === */
+
+  /* Surfaces */
+  --surface-base: var(--background);
+  --surface-raised: 210 20% 98%;
+  --surface-overlay: 0 0% 100%;
+  --surface-sunken: 210 20% 95%;
+
+  /* Text */
+  --text-primary: var(--foreground);
+  --text-secondary: var(--muted-foreground);
+  --text-subtle: 215 16% 60%;
+  --text-on-accent: var(--primary-foreground);
+
+  /* Accents */
+  --accent-primary: var(--primary);
+  --accent-success: 142 76% 36%;
+  --accent-warning: 38 92% 50%;
+  --accent-danger: var(--destructive);
+  --accent-info: 199 89% 48%;
+
+  /* Borders */
+  --border-default: var(--border);
+  --border-subtle: 214 32% 95%;
+  --border-strong: 215 20% 75%;
+
+  /* === Typography scale === */
+
+  /* Sizes (rem) */
+  --font-size-display: 3rem;
+  --font-size-h1: 2.25rem;
+  --font-size-h2: 1.875rem;
+  --font-size-h3: 1.5rem;
+  --font-size-h4: 1.25rem;
+  --font-size-body: 1rem;
+  --font-size-body-sm: 0.875rem;
+  --font-size-caption: 0.75rem;
+
+  /* Line heights */
+  --line-height-tight: 1.1;
+  --line-height-snug: 1.25;
+  --line-height-normal: 1.5;
+
+  /* Letter spacing */
+  --tracking-tighter: -0.02em;
+  --tracking-tight: -0.01em;
+  --tracking-normal: 0;
+  --tracking-wide: 0.02em;
+
+  /* Weights */
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* Families */
+  --font-sans:
+    ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono:
+    ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+    "Liberation Mono", monospace;
+
+  /* === Radii === */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-full: 9999px;
+}
+
+.dark {
+  --background: 222 47% 6%;
+  --foreground: 210 40% 98%;
+  --card: 222 47% 8%;
+  --card-foreground: 210 40% 98%;
+  --popover: 222 47% 6%;
+  --popover-foreground: 210 40% 98%;
+  --primary: 210 40% 98%;
+  --primary-foreground: 222 47% 11%;
+  --secondary: 217 32% 18%;
+  --secondary-foreground: 210 40% 98%;
+  --muted: 217 32% 18%;
+  --muted-foreground: 215 20% 65%;
+  --accent: 217 32% 18%;
+  --accent-foreground: 210 40% 98%;
+  --destructive: 0 63% 45%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 217 32% 18%;
+  --input: 217 32% 18%;
+  --ring: 215 20% 65%;
+
+  /* Dark surface ladder (each step lighter than the last) */
+  --surface-base: var(--background);
+  --surface-raised: 222 47% 10%;
+  --surface-overlay: 222 47% 12%;
+  --surface-sunken: 222 47% 4%;
+
+  --text-subtle: 215 16% 50%;
+  --border-subtle: 217 32% 14%;
+  --border-strong: 215 20% 35%;
+
+  --accent-success: 142 60% 45%;
+  --accent-warning: 38 85% 55%;
+  --accent-info: 199 80% 55%;
+}

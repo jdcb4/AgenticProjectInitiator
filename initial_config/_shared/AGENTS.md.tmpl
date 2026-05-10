@@ -35,6 +35,7 @@ If docs are missing, stale, or inconsistent with the code, fix them as part of t
 7. **Do not commit secrets, build output, `node_modules`, or local env files.** See `.gitignore` and `SECURITY.md`.
 8. **Do not weaken or skip tests to make them pass.** Fix the underlying issue.
 9. **Local dev is Windows PowerShell.** When running shell commands locally use PowerShell syntax (no `&&`/`||` chains, env vars are `$env:NAME`, line continuation is backtick). CI and Docker run on Linux bash — that's fine, just don't conflate the two. Cheatsheet in `docs/AGENT_REFERENCE.md`.
+10. **Use design tokens, not raw Tailwind classes.** Visual style — colour, font size, font weight, tracking, radii — flows through `src/styles/tokens.css` and the primitives in `src/components/ui/typography.tsx` and `src/components/ui/surface.tsx`. In feature code: write `<Heading level={2}>`, `<Body>`, `<Surface variant="raised">`, `bg-surface-base`, `text-text-secondary`. Do NOT write `text-3xl`, `font-semibold`, `tracking-tight`, `bg-blue-500`, `text-neutral-400`, hex colours, or raw rem sizes. Layout utilities (`flex`, `gap-4`, `px-6`, `min-h-dvh`) are fine. Add new tokens to `tokens.css` first, expose them in `tailwind.config.ts`, then use. See `docs/DESIGN_TOKENS.md`.
 
 ## Deterministic checks before commit
 
@@ -65,6 +66,7 @@ pnpm dlx fallow --no-cache --format human
 - `docs/DEPLOYMENT.md` — deploy instructions.
 - `docs/AGENT_REFERENCE.md` — detailed agent reference (load when relevant).
 - `docs/AGENT_PROMPTS.md` — canonical re-usable task prompts.
+- `docs/DESIGN_TOKENS.md` — colour, type, and layout token system.
 
 ## When blocked
 

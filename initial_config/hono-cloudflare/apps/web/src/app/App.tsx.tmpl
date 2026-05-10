@@ -1,6 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { HealthResponseSchema } from "@{{project_slug}}/shared/schemas";
 
+import { Body, Caption, Heading } from "@/components/ui/typography";
+import { Stack, Surface } from "@/components/ui/surface";
+
 export function App() {
   const { data, isLoading, isError } = useQuery({
     queryKey: ["health"],
@@ -12,19 +15,24 @@ export function App() {
   });
 
   return (
-    <main className="min-h-dvh flex flex-col items-center justify-center px-6 text-center">
-      <h1 className="text-3xl font-semibold tracking-tight">{{project_name}}</h1>
-      <p className="mt-3 max-w-prose text-neutral-400">
-        Scaffolded from the Hono on Cloudflare preset.
-      </p>
-      <p className="mt-6 font-mono text-sm text-neutral-300">
-        API:{" "}
-        {isLoading
-          ? "checking…"
-          : isError
-            ? "unreachable"
-            : `ok (${data?.timestamp})`}
-      </p>
-    </main>
+    <Surface
+      as="main"
+      className="min-h-dvh flex flex-col items-center justify-center px-6"
+    >
+      <Stack gap="default" align="center" className="text-center max-w-prose">
+        <Heading level={1}>{{project_name}}</Heading>
+        <Body className="text-text-secondary">
+          Scaffolded from the Hono on Cloudflare preset.
+        </Body>
+        <Caption>
+          API:{" "}
+          {isLoading
+            ? "checking…"
+            : isError
+              ? "unreachable"
+              : `ok (${data?.timestamp})`}
+        </Caption>
+      </Stack>
+    </Surface>
   );
 }
